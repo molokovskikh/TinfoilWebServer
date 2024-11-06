@@ -1,4 +1,7 @@
+sudo rm -rf TinfoilWebServer/Publish
+
 docker run -v $(pwd)/TinfoilWebServer:/tinfoil -w /tinfoil -it mcr.microsoft.com/dotnet/sdk:8.0 bash -c 'dotnet publish TinfoilWebServer.csproj --self-contained true -c Release -r linux-x64 -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o Publish && chown -R '$(id -ur)' Publish'
+
 
 cat<<EOF>TinfoilWebServer/Publish/TinfoilWebServer.config.json
 ﻿{
@@ -6,7 +9,7 @@ cat<<EOF>TinfoilWebServer/Publish/TinfoilWebServer.config.json
   "StripDirectoryNames": true,
   "ServeEmptyDirectories": false,
   "AllowedExt": [ "nsp", "nsz", "xci", "xcz" ],
-  "MessageOfTheDay": "Hello World!",
+  "MessageOfTheDay": "Hello from local Tinfoil!",
   "CustomIndexPath": null,
   "Cache": {
     "AutoDetectChanges": true,
@@ -14,8 +17,8 @@ cat<<EOF>TinfoilWebServer/Publish/TinfoilWebServer.config.json
   },
   "Authentication": {
     "Enabled": true,
-    "WebBrowserAuthEnabled": false,
-    "PwdType": "Sha256",
+    "WebBrowserAuthEnabled": true,
+    "PwdType": "Plaintext",
     "Users": [
       {
         "Name": "dina",
@@ -27,12 +30,12 @@ cat<<EOF>TinfoilWebServer/Publish/TinfoilWebServer.config.json
     ]
   },
   "FingerprintsFilter": {
-    "Enabled": true,
+    "Enabled": false,
     "FingerprintsFilePath": "fingerprints.json",
     "MaxFingerprints": 1
   },
   "Blacklist": {
-    "Enabled": true,
+    "Enabled": false,
     "FilePath": "blacklist.txt",
     "MaxConsecutiveFailedAuth": 3,
     "IsBehindProxy": false
@@ -77,4 +80,6 @@ docker build -t tinfoil -f Dockerfile TinfoilWebServer/Publish
 
 
 docker run -p8083:80 -v '/home/sergey/YuzuGames/New Super Mario Bros U Deluxe [NSZ]/':/tinfoil/packages/nsp -it tinfoil
+
+#curl -vvv -u dina:123456 -H UID:dina http://192.168.131.24:8083/
 
